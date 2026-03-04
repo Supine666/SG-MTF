@@ -1,107 +1,93 @@
-# SG-MTF
-
-### Segmentation-Guided Multi-Task Framework for Breast Lesion Segmentation and Molecular Subtyping
+SG-MTF
+Segmentation-Guided Multi-Task Framework for Breast Lesion Segmentation and Molecular Subtyping
 
 Official PyTorch implementation of the paper:
 
-**“A Segmentation-Guided Multi-Task Framework Using Multimodal Ultrasound Images and Clinicopathological Data for Breast Lesion Segmentation and Molecular Subtyping”**
+“A Segmentation-Guided Multi-Task Framework Using Multimodal Ultrasound Images and Clinicopathological Data for Breast Lesion Segmentation and Molecular Subtyping”
 
----
+Overview
 
-## Overview
+Breast cancer diagnosis often requires integrating ultrasound imaging with clinicopathological variables. However, most multimodal learning frameworks rely on global image features without explicit spatial constraints, which limits their ability to capture lesion-specific morphological cues.
 
-Breast cancer diagnosis often requires integrating **ultrasound imaging** with **clinicopathological variables**. However, most multimodal learning frameworks rely on global image features without explicit spatial constraints, which limits the ability to capture lesion-specific morphological cues.
+This repository implements SG-MTF, a segmentation-guided multimodal multi-task framework that jointly performs:
 
-This repository implements **SG-MTF**, a **segmentation-guided multimodal multi-task framework** that performs:
+Breast lesion segmentation
 
-* **Breast lesion segmentation**
-* **Molecular subtype classification**
-* **Missingness-robust clinical representation learning**
+Molecular subtype classification
 
-The framework follows a **lesion-localization-first diagnostic paradigm**, where segmentation-derived probability maps act as **soft spatial priors** to guide lesion-aware feature aggregation and multimodal fusion. 
+Missingness-robust clinical representation learning
 
-Key ideas:
+The framework follows a lesion-localization-first diagnostic paradigm, where segmentation-derived probability maps act as soft spatial priors to guide lesion-aware feature aggregation and multimodal fusion.
 
-* **Soft ROI-guided pooling**
-* **Lesion-conditioned clinical imputation**
-* **Reliability-aware multimodal gating**
-* **Uncertainty-aware tri-task optimization**
+Key ideas of SG-MTF include:
 
-Experiments across **five datasets** demonstrate strong segmentation accuracy, class-balanced discrimination, and robustness to clinical missingness. 
+Segmentation-guided multimodal reasoning, mimicking the clinical diagnostic workflow
 
----
+Soft spatial priors for lesion-aware feature aggregation
 
-# Repository Structure
+Missingness-robust clinical representation learning for incomplete tabular inputs
 
-```
+Uncertainty-aware tri-task optimization for stable multimodal learning
+
+Experiments across five datasets demonstrate strong segmentation accuracy, class-balanced subtype discrimination, and robustness to clinical missingness.
+
+Repository Structure
 SG-MTF
 │
 ├── datasets
-│   ├── dualtask_dataset.py       # multimodal dataset loader
-│   └── transforms.py             # image augmentation & preprocessing
+│   ├── __init__.py
+│   ├── sgmtf_dataset.py        # multimodal dataset loader
+│   └── transforms.py           # image augmentation & preprocessing
 │
 ├── models
-│   ├── backbones                 # segmentation encoder (GroupMixFormer)
-│   ├── fusion                    # multimodal fusion modules
-│   ├── heads                     # segmentation & classification heads
-│   ├── roi                       # ROI-guided pooling
+│   ├── backbones               # segmentation encoder
+│   ├── fusion                  # multimodal fusion modules
+│   ├── heads                   # segmentation & classification heads
+│   ├── roi                     # ROI-guided pooling
 │   ├── __init__.py
-│   └── sgmtf.py                  # main SG-MTF architecture
+│   └── sgmtf.py                # main SG-MTF architecture
 │
 ├── engines
-│   ├── losses.py                 # multi-task loss functions
-│   └── train_eval.py             # training & evaluation loops
+│   ├── losses.py               # multi-task loss functions
+│   └── train_eval.py           # training & evaluation loops
 │
 ├── utils
-│   ├── meters.py                 # training meters
-│   ├── metrics_seg.py            # Dice / mIoU
-│   ├── metrics_cls.py            # ACC / F1 / AUC
+│   ├── meters.py               # training meters
+│   ├── metrics_seg.py          # Dice / mIoU
+│   ├── metrics_cls.py          # ACC / F1 / AUC
 │   ├── roc.py
-│   ├── preprocess_fold.py        # fold-wise preprocessing
-│   ├── optim.py                  # optimizer & scheduler
-│   └── seed.py                   # reproducibility utilities
+│   ├── preprocess_fold.py      # fold-wise preprocessing
+│   ├── optim.py                # optimizer & scheduler
+│   └── seed.py                 # reproducibility utilities
 │
 ├── scripts
-│   ├── train_dual.py             # main training script
-│   └── checkpoints_sgmtf         # saved models
+│   └── run_cv.py               # 5-fold cross-validation runner
 │
-├── DualTask_Data                 # dataset directory (not included)
+├── data                        # dataset directory (not included)
 │
 ├── requirements.txt
 └── README.md
-```
-
----
-
-# Installation
-
-## 1. Clone repository
-
-```bash
-git clone https://github.com/xxx/SG-MTF.git
+Installation
+1. Clone repository
+git clone https://github.com/Supine666/SG-MTF.git
 cd SG-MTF
-```
+2. Create environment
 
----
+Recommended environment:
 
-## 2. Create environment
+Python 3.10
 
-Recommended: **Python 3.10 + PyTorch ≥ 2.1**
+PyTorch ≥ 2.1
 
-```bash
 conda create -n sgmtf python=3.10
 conda activate sgmtf
-```
 
 Install dependencies:
 
-```bash
 pip install -r requirements.txt
-```
 
-Example dependencies:
+Example dependencies include:
 
-```
 torch
 torchvision
 numpy
@@ -110,18 +96,13 @@ scikit-learn
 opencv-python
 matplotlib
 tqdm
-```
+Dataset Preparation
 
----
+Due to clinical privacy restrictions, the datasets used in the paper are not publicly distributed.
 
-# Dataset Preparation
+However, SG-MTF expects the following dataset structure:
 
-Due to clinical privacy, the datasets used in the paper are **not distributed**.
-
-However, SG-MTF expects the following structure.
-
-```
-DualTask_Data
+data
 │
 ├── images
 │   ├── 001.bmp
@@ -134,58 +115,50 @@ DualTask_Data
 │   └── ...
 │
 └── clinical.xlsx
-```
+Ultrasound Images
 
-### images
-
-Breast ultrasound images.
-
-```
 format: bmp / png / jpg
-size: resized to 256×256 during preprocessing
-channels: grayscale
-```
 
----
+modality: breast ultrasound
 
-### masks
+resized to 256×256 during preprocessing
 
-Binary segmentation masks.
+grayscale images
 
-```
+Segmentation Masks
+
+Binary lesion segmentation masks:
+
 0 = background
 1 = lesion
-```
+Clinical Data
 
----
-
-### clinical.xlsx
-
-Each row corresponds to one patient.
+The clinical.xlsx file contains tabular clinicopathological variables.
 
 Example:
 
-| pid | age | tumor_size | ER | PR | Ki67 | histology | label |
-| --- | --- | ---------- | -- | -- | ---- | --------- | ----- |
+pid	age	tumor_size	ER	PR	Ki67	histology	label
 
 Notes:
 
-* missing values should be **NaN**
-* numerical features are **z-score normalized**
-* categorical variables are **one-hot encoded**
-* missingness mask is automatically constructed during loading
+missing values should be stored as NaN
 
----
+numerical variables are z-score normalized
 
-# Training
+categorical variables are one-hot encoded
 
-The model is trained using **5-fold stratified cross-validation**.
+missingness masks are automatically constructed during loading
+
+Training and Evaluation
+
+The model is trained using 5-fold stratified cross-validation.
+
+Each fold is automatically trained and evaluated, and the final results are reported as mean ± standard deviation across folds.
 
 Example:
 
-```bash
-python scripts/train_dual.py \
-    --data_root DualTask_Data \
+python scripts/run_cv.py \
+    --data_root data \
     --image_dir images \
     --mask_dir masks \
     --clinical_file clinical.xlsx \
@@ -193,168 +166,95 @@ python scripts/train_dual.py \
     --batch_size 8 \
     --epochs 100 \
     --lr 1e-4
-```
+Training Configuration (Paper Setting)
+Parameter	Value
+image size	256×256
+optimizer	AdamW
+learning rate	1e-4
+weight decay	1e-4
+epochs	100
+scheduler	cosine annealing
+early stopping	patience = 12
+cross validation	5-fold stratified
+Evaluation Metrics
+Segmentation
 
-Training configuration (paper setting):
+Dice
 
-| Parameter        | Value             |
-| ---------------- | ----------------- |
-| image size       | 256×256           |
-| optimizer        | AdamW             |
-| learning rate    | 1e-4              |
-| weight decay     | 1e-4              |
-| epochs           | 100               |
-| scheduler        | cosine annealing  |
-| early stopping   | patience=12       |
-| cross validation | 5-fold stratified |
+mIoU
 
----
+Classification
 
-# Evaluation
+Accuracy
 
-After training, evaluate using the saved checkpoint.
+Macro-F1
 
-```
-python scripts/train_dual.py \
-    --eval \
-    --checkpoint checkpoints_sgmtf/best_model_fold1.pth
-```
+Macro-AUC
 
-Metrics:
+All results are reported as:
 
-### Segmentation
+mean ± standard deviation across the five folds
+Method Overview
 
-* Dice
-* mIoU
+SG-MTF consists of three major components.
 
-### Classification
+1. Segmentation-Guided Spatial Prior
 
-* Accuracy
-* Macro-F1
-* Macro-AUC
+A segmentation decoder generates a probability map that serves as a soft ROI prior:
 
-All results are reported as **mean ± std across 5 folds**.
-
----
-
-# Method Overview
-
-SG-MTF contains three main components.
-
-### 1️⃣ Segmentation-guided spatial prior
-
-A segmentation decoder generates a **probability map** that serves as a soft ROI prior.
-
-```
 Proi = sigmoid(conv1x1(Fseg))
-```
-
----
-
-### 2️⃣ Soft ROI-guided feature aggregation
+2. Soft ROI-Guided Feature Aggregation
 
 Visual features are aggregated using ROI weights:
 
-```
 vimg = Σ(Fcls * Proi) / (Σ(Proi) + ε)
-```
 
 This suppresses background artifacts and enforces lesion-focused representation learning.
 
----
+3. Missingness-Robust Clinical Modeling
 
-### 3️⃣ Missingness-robust clinical modeling
+Clinical variables are encoded together with their observation masks:
 
-Clinical variables are encoded together with their observation mask.
-
-```
 hclin = ψ([cobs ⊙ m, m])
-```
 
-Missing variables are reconstructed using lesion features.
+Missing variables are reconstructed using lesion features:
 
-```
 ĉ = fimp([hclin, vimg])
-```
-
----
-
-### 4️⃣ Reliability-aware multimodal fusion
+4. Reliability-Aware Multimodal Fusion
 
 Cross-modal gating dynamically reweights modality contributions:
 
-```
 gimg = σ(Wimg[vclin*, r])
 gclin = σ(Wclin vimg)
-```
-
----
-
-### 5️⃣ Uncertainty-aware tri-task optimization
+5. Uncertainty-Aware Tri-Task Optimization
 
 The network jointly optimizes:
 
-* segmentation
-* classification
-* clinical reconstruction
+segmentation
 
-```
+classification
+
+clinical reconstruction
+
 Ltotal =
 1/(2σ_seg²) Lseg +
 1/(2σ_cls²) Lcls +
 1/(2σ_imp²) Limp +
 λcons Lcons
-```
+Citation
 
----
+If you find this code useful, please cite our work:
 
-# Reproducing Paper Results
-
-Train the full model:
-
-```
-python scripts/train_dual.py --config configs/sgmtf.yaml
-```
-
-Expected performance (HER2USC dataset):
-
-| Metric   | Value |
-| -------- | ----- |
-| Dice     | 0.742 |
-| mIoU     | 0.676 |
-| ACC      | 0.832 |
-| Macro-F1 | 0.820 |
-| AUC      | 0.894 |
-
----
-
-# Citation
-
-If you use this code, please cite our paper.
-
-```
-@article{Ye2026SGMTF,
+@article{YeSGMTF2026,
 title={A Segmentation-Guided Multi-Task Framework Using Multimodal Ultrasound Images and Clinicopathological Data for Breast Lesion Segmentation and Molecular Subtyping},
 author={Ye, Jinlin and Hu, Deming and Ge, Zhongyu and Liu, Yuhan and Yang, Liang and Ren, Shangjie and Wang, Changjun and Zhou, Yidong and Zhang, Wei},
-journal={Information Fusion},
+note={Under review},
 year={2026}
 }
-```
+Acknowledgements
 
----
+This implementation is developed using the PyTorch deep learning framework and standard scientific computing libraries in Python.
 
-# Acknowledgements
+License
 
-This implementation builds upon several open-source libraries:
-
-* PyTorch
-* GroupMixFormer backbone
-* Medical segmentation frameworks
-
----
-
-# License
-
-This project is released under the **MIT License**.
-
----
+This project is released under the MIT License.

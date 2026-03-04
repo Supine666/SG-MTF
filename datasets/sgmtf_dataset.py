@@ -1,4 +1,4 @@
-# datasets/dualtask_dataset.py
+# datasets/sgmtf_dataset.py
 import os
 import warnings
 from typing import Dict, Optional, Tuple, List, Any
@@ -16,7 +16,7 @@ class DualTaskDataset(Dataset):
     """
     SG-MTF 对齐版 Dataset（fold-wise 防泄露 + CE target + pid 规范化 + 尺寸语义明确 + seg 有效标记）
 
-    默认返回（与你 train_dual.py 对齐）:
+    默认返回（与你 run_cv.py 对齐）:
       img:        FloatTensor [3,H,W] in [0,1]
       seg_mask:   FloatTensor [1,H,W] (0/1). 若缺失则全0占位
       has_mask:   UInt8Tensor [] (0/1). loss 端用来 mask 掉 Lseg
@@ -407,7 +407,7 @@ class DualTaskDataset(Dataset):
             # 约定：transform 接受 (img, seg_mask) -> (img, seg_mask)
             img, seg_mask = self.transform(img, seg_mask)
 
-        # --- return (与你 train_dual.py 对齐) ---
+        # --- return (与你 run_cv.py 对齐) ---
         if self.return_pid:
             if self.return_cat_targets:
                 return img, seg_mask, has_mask, c_obs, m, y, cat_targets, pid

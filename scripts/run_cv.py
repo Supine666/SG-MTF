@@ -1,4 +1,4 @@
-# scripts/train_dual.py
+# scripts/run_cv.py
 import os
 import time
 from dataclasses import dataclass
