@@ -338,6 +338,5 @@ This implementation is developed using the **PyTorch deep learning framework** a
 
 This project is released under the **MIT License**.
 
-```
 
 
